@@ -24,7 +24,7 @@ cityseer = [
     "cityseer>=4.21.0",
 ]
 neatnet = [
-    "neatnet>=0.3.0",
+    "neatnet>=0.1.0",
 ]
 dev = [
     "pytest>=8.0.0",
