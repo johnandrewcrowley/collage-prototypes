@@ -1,0 +1,22 @@
+{
+  "name": "collage-prototypes",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev:backend": "cd shared/python-backend && uv run uvicorn collage_backend.main:app --reload --port 8000",
+    "dev:p1": "pnpm --filter p1-sustainability dev",
+    "dev:p2": "pnpm --filter p2-morphology dev",
+    "dev:p3": "pnpm --filter p3-network dev",
+    "dev:p4": "pnpm --filter p4-fragment dev",
+    "dev:p5": "pnpm --filter p5-taxonomy dev",
+    "build": "turbo build",
+    "check": "turbo check",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.9.0"
+  }
+}

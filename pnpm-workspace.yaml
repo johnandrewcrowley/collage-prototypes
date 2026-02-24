@@ -1,0 +1,4 @@
+packages:
+  - 'shared/types'
+  - 'shared/map-template'
+  - 'prototypes/*'
