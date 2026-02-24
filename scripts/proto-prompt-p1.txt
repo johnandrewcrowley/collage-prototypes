@@ -17,6 +17,45 @@ P1 validates the workflow: select area (max 1 km²) → extract buildings → co
 8. Import types: `import type { ... } from '@collage/proto-types';`
 9. The Python backend runs at http://localhost:8000. The Vite proxy maps /api/* to the backend.
 
+## Automated Testing (critical)
+
+Implement lightweight automated checks as you build each phase. NO browser automation.
+
+### 1. window.__TEST_API__
+The shared map template exposes `window.__TEST_API__` with scene state. Extend it in your prototype:
+
+```javascript
+(window).__TEST_API__ = {
+  ...(window).__TEST_API__,
+  getMetricValues: () => { /* return current computed metrics */ },
+};
+```
+
+After each phase, log a self-check:
+```javascript
+console.log('[P1-CHECK]', JSON.stringify(window.__TEST_API__.getMetricValues()));
+```
+
+### 2. Backend smoke tests
+Write a small script or function that validates backend endpoint responses:
+```typescript
+const res = await fetch('http://localhost:8000/health');
+const data = await res.json();
+console.assert(data.status === 'ok', 'Health check failed');
+```
+Log pass/fail in FINDINGS.md.
+
+### 3. Metric validation
+When testing with Barcelona Eixample, validate against known benchmarks:
+- ISR ≈ 0.7 (±15%)
+- BAF ≈ 0.3 (±15%)
+- LCZ = 2 (Compact Midrise) — exact match
+- GSI ≈ 0.37 (±15%), FSI ≈ 1.89 (±15%), Mean height ≈ 18m (±20%)
+Log results with `[P1-BENCHMARK]` prefix. Report computed vs expected in FINDINGS.md.
+
+### 4. No browser automation
+Do NOT use Playwright, Puppeteer, or any browser automation tool. Do NOT take screenshots. Visual testing is manual after the autonomous run.
+
 ## Session Workflow
 
 1. Check git log for prior work on this prototype

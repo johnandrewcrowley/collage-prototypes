@@ -19,6 +19,42 @@ P5 is unique: it uses NO runtime backend calls. All data is pre-computed in a ba
 8. Import types: `import type { ... } from '@collage/proto-types';`
 9. No backend API calls at runtime. Data comes from pre-built GeoParquet files.
 
+## Automated Testing (critical)
+
+Implement lightweight automated checks as you build each phase. NO browser automation.
+
+### 1. window.__TEST_API__
+The shared map template exposes `window.__TEST_API__` with scene state. Extend it in your prototype:
+
+```javascript
+(window).__TEST_API__ = {
+  ...(window).__TEST_API__,
+  getClassificationState: () => { /* return current classification system + cell counts */ },
+};
+```
+
+After each phase, log a self-check:
+```javascript
+console.log('[P5-CHECK]', JSON.stringify(window.__TEST_API__.getClassificationState()));
+```
+
+### 2. Data pipeline validation
+Since P5 uses pre-extracted data (no runtime backend), validate the batch pipeline output:
+- Cell count: expect 30K–50K tessellation cells for San Francisco
+- All 3 classification systems produce results (Spacematrix, LCZ, morphometric clusters)
+- GeoParquet files load in <5s
+Log results with `[P5-BENCHMARK]` prefix in FINDINGS.md.
+
+### 3. Classification validation
+Validate that classification patterns are geographically coherent:
+- Spacematrix: downtown = high FSI, residential = low FSI
+- LCZ: downtown ≠ residential areas
+- Morphometric clusters: k ≈ 8–12 (BIC-selected)
+Log cluster counts and type distributions in FINDINGS.md.
+
+### 4. No browser automation
+Do NOT use Playwright, Puppeteer, or any browser automation tool. Do NOT take screenshots. Visual testing is manual after the autonomous run.
+
 ## Session Workflow
 
 1. Check git log for prior work on this prototype

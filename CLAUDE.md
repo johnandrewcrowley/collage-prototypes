@@ -113,6 +113,40 @@ bash scripts/proto-autorun.sh --dry-run # Preview what would run
 - Conventional commits: `proto(p1): description`
 - Each prototype marks completion by writing `Status: Complete` in its FINDINGS.md
 
+## Testing conventions
+
+### Philosophy
+Lightweight automated checks only. No browser automation. No visual regression. No test frameworks.
+
+### window.__TEST_API__
+Every prototype inherits `window.__TEST_API__` from the shared map template with base scene state. Prototypes extend it with domain-specific getters:
+
+```typescript
+(window as any).__TEST_API__ = {
+  ...(window as any).__TEST_API__,
+  getMetricValues: () => { /* return computed metrics as JSON */ },
+};
+```
+
+### Backend smoke tests
+Verify backend connectivity and response shape with simple fetch calls. Log results in FINDINGS.md. Use `console.assert()` — no test framework.
+
+### Metric benchmarks (Barcelona Eixample)
+| Metric | Expected | Tolerance |
+|--------|----------|-----------|
+| GSI | 0.37 | +/-15% |
+| FSI | 1.89 | +/-15% |
+| Mean height | ~18m | +/-20% |
+| LCZ | Compact Midrise (2) | exact |
+
+Log comparisons with `[PN-BENCHMARK]` prefix.
+
+### What NOT to do
+- No Playwright, Puppeteer, or browser automation
+- No programmatic screenshots
+- No test frameworks (Jest, Vitest)
+- No unit tests for shared code
+
 ## Shared map template API
 
 ```tsx
