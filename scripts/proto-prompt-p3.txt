@@ -1,0 +1,128 @@
+You are building prototype P3 (Network & Space Syntax Analysis) for the Collage Earth project.
+
+## Your Assignment
+
+You are working on prototype P3 in the directory prototypes/p3-network/.
+P3 validates the workflow: select area (max 5 km²) → extract street network with 1 km buffer → compute space syntax (NAIN/NACH at 4 radii) + network topology metrics → visualize street-level metric coloring → generate walking isochrones from clicked points.
+
+## Rules (critical)
+
+1. ONLY modify files in prototypes/p3-network/. Never modify shared code, other prototypes, or root config.
+2. FINDINGS.md is your primary output. Update it continuously as you work.
+3. Commit frequently: proto(p3): description
+4. Log all measurements (times, memory, FPS, success/failure rates) in FINDINGS.md.
+5. If you observe any early failure indicator, stop, document it, and write your findings.
+6. This is a prototype — prioritize working features over polish. Skip extensive error handling.
+7. Import shared components: `import { MapShell, useMapStore, extractArea } from '@collage/map-template';`
+8. Import types: `import type { ... } from '@collage/proto-types';`
+9. The Python backend runs at http://localhost:8000. The Vite proxy maps /api/* to the backend.
+
+## Session Workflow
+
+1. Check git log for prior work on this prototype
+2. Read prototypes/p3-network/FINDINGS.md for current state
+3. Continue from where you left off (or start Phase 1 if fresh)
+4. Work through the phases in order (see brief below)
+5. Update FINDINGS.md after each phase
+6. At the end of each phase, write a **Manual Testing** checkpoint in FINDINGS.md (see below)
+7. Commit and push when done or when stopping
+8. When all phases are complete, change FINDINGS.md status to "Status: Complete"
+
+## Manual Testing Checkpoints (critical)
+
+The project owner is an architect, not a developer. After each phase:
+
+1. **Commit your work** so the owner can test at any time.
+2. **Add a "Manual Testing" section** under each phase in FINDINGS.md with:
+   - Step-by-step instructions (assume no command-line knowledge)
+   - What to look for and what "good" vs "bad" looks like
+3. **Mark each checkpoint** with one of:
+   - `🔍 Awaiting human verification` — owner hasn't tested yet
+   - `✅ Human-verified` — owner confirmed it works
+   - `⚠️ Human-verified with issues` — owner found problems
+4. **Do NOT wait for testing.** Continue to the next phase immediately.
+
+## Prototype Brief
+
+### Question
+Can space syntax metrics (NAIN/NACH) from cityseer be visualized as street-level coloring with radius toggling, combined with client-side network topology metrics and walking isochrones?
+
+### Success Criteria
+
+1. NAIN correctly identifies high-integration streets (validate: Barcelona Passeig de Gràcia shows high NAIN at R800)
+2. Radius toggle (400m, 800m, 1600m, 10000m) visibly shifts emphasis between local and global streets
+3. NACH values in 0–1.5 range, NAIN values in 0.1–1.2 range
+4. 5 km² extraction completes in <180s total
+5. Metric/radius switching is instant (<100ms, no re-fetch)
+6. neatnet simplification shows 58–95% edge reduction (before/after toggle)
+7. Isochrone generation <1s per click (3 polygons: 5/10/15 min walking)
+8. Network statistics (meshedness, link-node ratio, dead-end ratio) are mathematically correct
+9. Works across 3+ city morphologies (Barcelona grid, Prague irregular, London radial)
+10. Segment hover tooltip shows all metric values for that street
+
+### Failure Indicators (stop early)
+
+- cityseer unavailable or fails (backend returns error) — fall back to momepy-based metrics
+- 5 km² extraction takes >300s
+- MapLibre line rendering breaks with >10,000 segments
+
+### Phases
+
+**Phase 1: Backend Pipeline + Network Visualization** — Request extraction from backend /extract with larger bbox (5 km²). Backend returns streets GeoJSON with NAIN/NACH at 4 radii if cityseer is available. Render streets as MapLibre line layer with data-driven coloring (viridis ramp for NAIN, magma for NACH). Default view: NAIN at R800. Implement neatnet before/after toggle (backend returns both raw and simplified networks). Show basic network statistics panel. This is primarily a 2D prototype — use flat MapLibre rendering for streets rather than Three.js.
+
+**Phase 2: Metric Controls + Client-Side Metrics** — Implement sidebar with metric selector: NAIN/NACH dropdown and radius selector (400/800/1600/10000m). Switching metric or radius recolors lines instantly from pre-fetched data (no API call). Implement client-side topology metrics using Graphology: meshedness, dead-end ratio, link-node ratio, mean segment length, 4-way intersection proportion, intersection density. Display in a stats panel. Implement segment hover tooltip showing all metric values. Optional: line width encoding for NACH (wider = higher choice).
+
+**Phase 3: Isochrones + Comparison + Multi-City Testing** — Implement click-to-isochrone: user clicks a point on the map, send to backend /network/isochrone, display 3 concentric walking polygons (5-min green, 10-min blue, 15-min red fill with opacity). Isochrone area displayed in m². Test with Barcelona (grid → large isochrones), Prague (irregular → constrained isochrones), and London (radial → directional isochrones). Validate that NAIN patterns match expected urban structure. Polish: add color ramp legends, metric descriptions, area selector for new extractions.
+
+### Stack
+
+MapLibre GL JS ^5.0.0, React ^19.0.0, TypeScript ^5.9.0, Vite ^7.0.0, Zustand ^5.0.0, Graphology ^0.25.0.
+Backend: cityseer (NAIN/NACH), neatnet (simplification), NetworkX (isochrone Dijkstra), Shapely (concave_hull).
+
+### 12 Metrics Reference
+
+**Space Syntax (4 metric types × 4 radii = 16 values):**
+- NAIN (Normalized Angular Integration) at R400, R800, R1600, R10000
+- NACH (Normalized Angular Choice) at R400, R800, R1600, R10000
+
+**Graph Topology (6):**
+- Meshedness: (e−v+1) / (2v−5)
+- Dead-end ratio: degree-1 nodes / total nodes
+- Link-node ratio: edges / nodes
+- Mean segment length: sum(edge_lengths) / edge_count
+- 4-way intersection proportion: degree-4+ nodes / total intersections
+- Intersection density: intersections per km²
+
+**Walking Isochrones (3):**
+- 5-minute walking polygon (≈400m at 80m/min)
+- 10-minute walking polygon (≈800m)
+- 15-minute walking polygon (≈1200m)
+
+### UI Layout
+
+- **Map** fills viewport with street network rendering (MapLibre lines, no 3D buildings by default)
+- **Sidebar** (left, 280px):
+  - Metric selector: NAIN | NACH dropdown
+  - Radius selector: 400 | 800 | 1600 | 10000 radio buttons
+  - Network statistics panel (6 topology metrics)
+  - neatnet toggle: "Show raw network" checkbox
+- **Isochrone info** (on click): area for each ring in m²
+- **Color ramp legend** (bottom-right): gradient with metric name and range
+- **Segment hover tooltip**: NAIN@R800, NACH@R800, length, etc.
+
+### Research Context
+
+Key planning documents in the research/ directory:
+- research/86-plan-p3-network.md — complete implementation plan
+- research/findings-09-walkability.md — connectivity and accessibility analysis
+- research/findings-05-space-syntax.md — space syntax implementation guide
+
+### Critical Notes
+
+- cityseer may not be available on all Python versions (requires <3.14). If /space-syntax returns an error, fall back to momepy betweenness or show a warning.
+- P3 is primarily a 2D visualization — streets are MapLibre line layers, not Three.js. Buildings shown optionally.
+- 5 km² requires 1 km buffer for accurate edge metrics → backend actually extracts ~16 km² raw area
+- neatnet simplification typically reduces 58–95% of edges — the simplified network is the default view
+- NAIN range: 0.1–1.2 (most values 0.5–0.9). NACH range: 0–1.5 (most values 0.1–0.7).
+- Isochrone colors: 5-min (#22c55e, green), 10-min (#3b82f6, blue), 15-min (#ef4444, red), all at opacity 0.25
+- Street walking speed: 80 m/min (4.8 km/h)

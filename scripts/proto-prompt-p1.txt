@@ -1,0 +1,143 @@
+You are building prototype P1 (Sustainability Scanner) for the Collage Earth project.
+
+## Your Assignment
+
+You are working on prototype P1 in the directory prototypes/p1-sustainability/.
+P1 validates the workflow: select area (max 1 km²) → extract buildings → compute and visualize environmental screening metrics across three domains: solar/shadow, environmental surface, and climate risk.
+
+## Rules (critical)
+
+1. ONLY modify files in prototypes/p1-sustainability/. Never modify shared code, other prototypes, or root config.
+2. FINDINGS.md is your primary output. Update it continuously as you work.
+3. Commit frequently: proto(p1): description
+4. Log all measurements (times, memory, FPS, success/failure rates) in FINDINGS.md.
+5. If you observe any early failure indicator, stop, document it, and write your findings.
+6. This is a prototype — prioritize working features over polish. Skip extensive error handling.
+7. Import shared components: `import { MapShell, useMapStore, BuildingMeshManager, colorize, COLOR_RAMPS, extractArea } from '@collage/map-template';`
+8. Import types: `import type { ... } from '@collage/proto-types';`
+9. The Python backend runs at http://localhost:8000. The Vite proxy maps /api/* to the backend.
+
+## Session Workflow
+
+1. Check git log for prior work on this prototype
+2. Read prototypes/p1-sustainability/FINDINGS.md for current state
+3. Continue from where you left off (or start Phase 1 if fresh)
+4. Work through the phases in order (see brief below)
+5. Update FINDINGS.md after each phase
+6. At the end of each phase, write a **Manual Testing** checkpoint in FINDINGS.md (see below)
+7. Commit and push when done or when stopping
+8. When all phases are complete, change FINDINGS.md status to "Status: Complete"
+
+## Manual Testing Checkpoints (critical)
+
+The project owner is an architect, not a developer. After each phase:
+
+1. **Commit your work** so the owner can test at any time.
+2. **Add a "Manual Testing" section** under each phase in FINDINGS.md with:
+   - Step-by-step instructions (assume no command-line knowledge)
+   - What to look for and what "good" vs "bad" looks like
+   - Screenshots or expected visual appearance described in words
+3. **Mark each checkpoint** with one of:
+   - `🔍 Awaiting human verification` — owner hasn't tested yet
+   - `✅ Human-verified` — owner confirmed it works
+   - `⚠️ Human-verified with issues` — owner found problems
+4. **Do NOT wait for testing.** Continue to the next phase immediately.
+
+Example FINDINGS.md checkpoint format:
+
+```
+### Manual Testing — Phase 1
+**Status:** 🔍 Awaiting human verification
+
+**How to test:**
+1. Open a terminal in the collage-prototypes directory
+2. Run: `pnpm dev:backend` (in one terminal)
+3. Run: `pnpm dev:p1` (in another terminal)
+4. Open http://localhost:5171 in your browser
+5. Draw a rectangle on the map (click and drag)
+6. Wait for buildings to load (~30-60s)
+7. You should see 3D buildings with moving shadows
+
+**What to verify:**
+- [ ] Map loads with Barcelona visible
+- [ ] Shadow animation plays smoothly (≥30 FPS)
+- [ ] Time slider changes shadow direction
+- [ ] Play/pause button works
+
+**Machine-measured results:** (FPS, render times)
+**Human-verified results:** (to be filled in by owner)
+```
+
+## Prototype Brief
+
+### Question
+Can environmental screening metrics be computed and visualized in-browser from OSM data alone, with real-time shadow animation, ground heatmaps, and facade coloring?
+
+### Success Criteria
+
+1. Shadow animation ≥30 FPS at 500 buildings with DirectionalLight shadow map
+2. Sun-hours ground heatmap computes in <30s for 500 buildings on a 10m grid (~120 sun positions)
+3. SVF ground heatmap computes in <15s for 500 sample points using hemisphere BVH raycasting
+4. VSC facade coloring computes in <15s for 500 facade sample points
+5. All 16 metrics display correctly with appropriate color ramps and legends
+6. ISR, BAF, and runoff values are plausible for Barcelona Eixample (~0.7 ISR, ~0.3 BAF)
+7. LCZ classification correctly identifies Eixample as LCZ 2 (Compact Midrise)
+8. UTCI categories show heat stress in exposed areas vs comfort in shaded areas
+9. Tab switching (Solar/Environment/Climate Risk) is instant (<100ms)
+10. Summary bar shows area-wide ISR, BAF, shadow%, sun-hours range, and LCZ badge
+11. All metric visualizations include precision labels explaining estimation uncertainty
+12. Time slider controls shadow position from sunrise to sunset on selected date
+
+### Failure Indicators (stop early)
+
+- Shadow FPS below 15 at 500 buildings
+- BVH raycasting crashes or takes >120s
+- MapLibre + Three.js render loop breaks when adding shadow/heatmap layers
+
+### Phases
+
+**Phase 1: Shadow Animation** — Implement DirectionalLight shadow mapping on Three.js buildings. Add time slider (sunrise→sunset), date selector (equinox/solstice presets + custom), play/pause animation. Use SunCalc for sun position. Shadow map size 2048×2048, PCFSoftShadowMap. Shadow coverage percentage via readPixels or counting. Ground plane receives shadows using ShadowMaterial. Measure FPS at 100/500 buildings.
+
+**Phase 2: Environmental Metrics** — Fetch sustainability metrics from backend (/metrics/sustainability). Display ISR, BAF, runoff as per-cell ground colors using GroundHeatmap or MapLibre fill layers. Display embodied carbon (E5) and operational carbon (E6) as per-building colors computed client-side. Display canyon H/W as street line colors. Show LCZ badge in summary panel. Implement metric selector within Environment tab. Add color ramp legends.
+
+**Phase 3: Sun-Hours, SVF, VSC** — Implement BVH-accelerated raycasting using three-mesh-bvh. Sun-hours: cast rays from ground grid points toward ~120 annual sun positions; color ground heatmap (hours/year). SVF: cast hemisphere rays from ground sample points (145-ray Tregenza scheme); color ground heatmap (0–1 scale). VSC: cast hemisphere rays from facade sample points, weight by CIE sky; color building faces. All compute in Web Worker to avoid blocking UI. Show progress indicator during computation.
+
+**Phase 4: Climate Risk + Polish** — Compute screening-level UTCI using jsthermalcomfort library with Open-Meteo weather API data (temperature, humidity, wind, radiation) + SVF + shadow state. Display as ground heatmap with UTCI thermal stress categories (cold stress → comfort → heat stress). Compute heat island risk composite (ISR + SVF + LCZ + vegetation). Compute wind canyon risk from H/W ratio. Compute flood vulnerability from ISR + green fraction. Add precision labels to all metrics. Polish tab switching, tooltip hover, summary bar.
+
+### Stack
+
+MapLibre GL JS ^5.0.0, Three.js ^0.178.0, @dvt3d/maplibre-three-plugin ^1.3.0, React ^19.0.0, TypeScript ^5.9.0, Vite ^7.0.0, Zustand ^5.0.0, SunCalc ^1.9.0, three-mesh-bvh ^0.8.0, jsthermalcomfort ^1.0.0, @turf/turf ^7.0.0.
+
+### 16 Metrics Reference
+
+Solar domain (6): S1 shadow pattern, S2 shadow coverage %, S3 annual sun-hours, S4 SVF, S5 VSC, S6 canyon H/W
+Environment domain (6): E1 ISR, E2 BAF, E3 runoff coefficient, E4 LCZ, E5 embodied carbon, E6 operational carbon
+Climate risk domain (4): R1 UTCI screening, R2 heat island risk, R3 wind canyon risk, R4 flood vulnerability
+
+### UI Layout
+
+- **Map** fills viewport with 3D buildings
+- **Tab bar** (top-left): Solar | Environment | Climate Risk
+- **Metric selector** (left sidebar, within active tab): radio buttons for available metrics
+- **Time slider** (bottom, Solar tab only): horizontal slider sunrise→sunset + date presets + play/pause
+- **Summary bar** (bottom): ISR%, BAF, shadow@noon%, sun-hours range, LCZ badge
+- **Color ramp legend** (bottom-right): vertical gradient with min/max labels
+- **Building hover tooltip**: height, current metric value, precision label
+
+### Research Context
+
+Key planning documents in the research/ directory:
+- research/84-plan-p1-sustainability.md — complete implementation plan with code snippets
+- research/findings-08-solar-shadow.md — solar analysis methods
+- research/findings-10-environmental-screening.md — metric catalog
+- research/findings-40-utci-thermal-comfort.md — UTCI pipeline
+
+### Critical Notes
+
+- Use ShadowMaterial for ground plane (transparent except shadows), not MeshStandardMaterial
+- three-mesh-bvh: call `computeBoundsTree()` on merged geometry before raycasting
+- SVF hemisphere: Tregenza 145-patch scheme, weight patches by cos(altitude) × solid_angle
+- UTCI is screening-level only — use precision label "±3–5°C, screening estimate"
+- Open-Meteo API is free, no key needed: https://api.open-meteo.com/v1/forecast
+- Shadow map: renderer.shadowMap.type = THREE.PCFSoftShadowMap
+- For embodied carbon, use archetype factors: residential_concrete=500, office_steel=600, default=500 kgCO₂e/m²
