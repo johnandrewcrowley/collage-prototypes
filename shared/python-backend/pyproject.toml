@@ -11,15 +11,21 @@ dependencies = [
     "shapely>=2.0.0",
     "osmnx>=2.1.0",
     "momepy>=0.11.0",
-    "cityseer>=4.21.0",
     "scikit-learn>=1.6.0",
-    "neatnet>=0.3.0",
     "pyogrio>=0.10.0",
     "pyarrow>=18.0.0",
     "numpy>=2.0.0",
+    "scipy>=1.14.0",
+    "networkx>=3.0.0",
 ]
 
 [project.optional-dependencies]
+cityseer = [
+    "cityseer>=4.21.0",
+]
+neatnet = [
+    "neatnet>=0.3.0",
+]
 dev = [
     "pytest>=8.0.0",
     "httpx>=0.28.0",
