@@ -104,6 +104,25 @@ export function MapShell({
       group.add(mgr.getObject3D());
 
       map.triggerRepaint();
+
+      // Expose test API for automated validation (no browser automation needed)
+      (window as unknown as Record<string, unknown>).__TEST_API__ = {
+        getSceneState: () => {
+          const stats = buildingMgrRef.current?.getStats() ?? {
+            buildingCount: 0,
+            meshType: null,
+          };
+          return {
+            ...stats,
+            groupChildCount: rtcGroupRef.current?.children.length ?? 0,
+            mapLoaded: true,
+            mapCenter: mapRef.current
+              ? [mapRef.current.getCenter().lng, mapRef.current.getCenter().lat]
+              : null,
+            mapZoom: mapRef.current?.getZoom() ?? null,
+          };
+        },
+      };
     });
 
     // Click handler — raycast Three.js first, fall back to MapLibre
@@ -159,6 +178,7 @@ export function MapShell({
     });
 
     return () => {
+      delete (window as unknown as Record<string, unknown>).__TEST_API__;
       buildingMgrRef.current?.dispose();
       buildingMgrRef.current = null;
       mapSceneRef.current = null;

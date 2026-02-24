@@ -211,6 +211,14 @@ export class BuildingMeshManager {
     }
   }
 
+  /** Get mesh statistics for test introspection. */
+  getStats(): { buildingCount: number; meshType: 'instanced' | 'merged' | null } {
+    return {
+      buildingCount: this.buildingIds.length,
+      meshType: this.instancedMesh ? 'instanced' : this.mergedMesh ? 'merged' : null,
+    };
+  }
+
   /** Get the Three.js group for adding to scene. */
   getObject3D(): THREE.Object3D {
     return this.group;
