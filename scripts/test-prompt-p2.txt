@@ -1,0 +1,77 @@
+You are running automated visual tests for Prototype P2 (Morphology Metrics Scanner).
+
+## Assignment
+Test the P2 prototype at http://localhost:5172 using Playwright tests and visual screenshot examination.
+Write results to /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P2.md
+
+## Prerequisites
+- Backend: http://localhost:8000 (verify with curl)
+- Dev server: http://localhost:5172 (already running)
+- Playwright installed at /c/Users/johnc/collage-prototypes/
+
+## Step 1: Run Playwright Tests
+
+```bash
+cd /c/Users/johnc/collage-prototypes
+npx playwright test --project=p2-morphology
+```
+
+Record the output. Tests trigger extraction of Barcelona Eixample via __TEST_API__.triggerExtraction().
+Extraction takes 30-85 seconds — be patient with timeouts.
+
+## Step 2: Examine Screenshots
+
+Read each PNG file in /c/Users/johnc/collage-prototypes/test-results/screenshots/p2/.
+
+Expected visuals:
+- 01-map-loaded.png: Barcelona visible on light basemap, area selector button visible
+- 02-buildings-loaded.png: 3D colored buildings visible in the Eixample grid area
+- 03-metrics-computed.png: Buildings colored by a metric, Spacematrix card visible (top-left)
+- 04-metric-coloring.png: Buildings colored with a viridis-like gradient
+
+## Step 3: Check Benchmarks
+
+From [P2-TEST] console output, verify Barcelona Eixample benchmarks:
+- GSI: ~0.37 (±15%) → valid range: 0.31–0.43
+- FSI: ~1.89 (±15%) → valid range: 1.61–2.17
+- LCZ: 2 (Compact Midrise) — exact match
+- Building count: >50
+
+## Step 4: Write Results
+
+Write /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P2.md:
+
+```markdown
+# P2 — Morphology Metrics Test Results
+Date: YYYY-MM-DD
+
+## Summary
+| Test | Status | Notes |
+|------|--------|-------|
+| Map loads | PASS/FAIL | ... |
+| Extraction + metrics | PASS/FAIL | Building count: N, extraction time: Ns |
+| GSI benchmark | PASS/FAIL | Actual: N, expected: 0.37 ±15% |
+| FSI benchmark | PASS/FAIL | Actual: N, expected: 1.89 ±15% |
+| LCZ classification | PASS/FAIL | Actual: N, expected: 2 |
+| Metric coloring | PASS/FAIL | ... |
+| Timing logged | PASS/FAIL | Tier 1: Nms, Tier 2: Nms |
+
+## Benchmark Validation
+| Metric | Expected | Actual | Tolerance | Status |
+|--------|----------|--------|-----------|--------|
+| GSI | 0.37 | N | ±15% | PASS/FAIL |
+| FSI | 1.89 | N | ±15% | PASS/FAIL |
+| LCZ | 2 | N | exact | PASS/FAIL |
+
+## Visual Assessment
+(Describe each screenshot)
+
+## Issues Found
+## Recommendations
+```
+
+## Important Notes
+- Extraction requires the Python backend to be running and responsive
+- If extraction times out, check backend logs at test-results/logs/backend.log
+- Barcelona Eixample is a regular grid — GSI/FSI values should be very consistent
+- If screenshots show blank canvas, this may be a SwiftShader issue — note it

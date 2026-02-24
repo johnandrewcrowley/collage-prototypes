@@ -1,0 +1,88 @@
+You are running automated visual tests for Prototype P5 (Urban Taxonomy — San Francisco).
+
+## Assignment
+Test the P5 prototype at http://localhost:5175 using Playwright tests and visual screenshot examination.
+Write results to /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P5.md
+
+## Prerequisites
+- Backend: http://localhost:8000 (verify with curl)
+- Dev server: http://localhost:5175 (already running)
+- Playwright installed at /c/Users/johnc/collage-prototypes/
+
+## Step 1: Run Playwright Tests
+
+```bash
+cd /c/Users/johnc/collage-prototypes
+npx playwright test --project=p5-taxonomy
+```
+
+Record the output (pass/fail per test, timing, any errors).
+
+## Step 2: Examine Screenshots
+
+Read each PNG file in /c/Users/johnc/collage-prototypes/test-results/screenshots/p5/ using the Read tool.
+
+For each screenshot, describe:
+- What you see (map, colored cells, UI panels, legends)
+- Whether it looks correct for a urban taxonomy visualization
+- Any visual issues (blank canvas, missing data, broken UI)
+
+Expected visuals:
+- 01-map-loaded.png: San Francisco visible on a light basemap
+- 02-data-loaded.png: Colored tessellation cells covering SF, status bar showing cell count
+- 03-spacematrix-active.png: Cells colored by Spacematrix classification (greens/yellows dominate)
+- 04-lcz-toggled.png: Different color pattern (blues/oranges for LCZ classes)
+- 05-cluster-toggled.png: Different color pattern again (GMM cluster colors)
+
+## Step 3: Check Test Output
+
+From the Playwright console output, look for [P5-TEST] lines:
+- Cell count should be >100,000 (expecting ~156,609)
+- Load time should be <60 seconds
+- Classification should switch between Spacematrix, LCZ, and Cluster
+
+## Step 4: Write Results
+
+Write /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P5.md with this structure:
+
+```markdown
+# P5 — Urban Taxonomy Test Results
+Date: YYYY-MM-DD
+
+## Summary
+| Test | Status | Notes |
+|------|--------|-------|
+| Map loads | PASS/FAIL | ... |
+| Data auto-loads | PASS/FAIL | Cell count: N, load time: Nms |
+| Spacematrix active | PASS/FAIL | ... |
+| Classification toggle | PASS/FAIL | ... |
+| Load time acceptable | PASS/FAIL | ... |
+
+## Benchmark Values
+| Metric | Value | Expected | Status |
+|--------|-------|----------|--------|
+| Cell count | N | >100,000 | PASS/FAIL |
+| Load time | Nms | <60,000ms | PASS/FAIL |
+
+## Visual Assessment
+### 01-map-loaded.png
+(Describe what you see)
+
+### 02-data-loaded.png
+(Describe what you see)
+
+(Continue for each screenshot)
+
+## Issues Found
+- (List any failures, visual problems, or concerns)
+
+## Recommendations
+- (Suggestions for fixes or improvements)
+```
+
+## Important Notes
+- P5 auto-loads pre-extracted SF data — no extraction or backend call needed for data loading
+- The data file is ~69 MB GeoJSON, so loading may take 10-30 seconds
+- If Playwright tests fail due to timeout, increase wait times and retry
+- If screenshots show blank canvas, note this as a SwiftShader rendering issue
+- Be honest about what you see — report failures accurately

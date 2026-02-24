@@ -1,0 +1,75 @@
+You are running automated visual tests for Prototype P3 (Network & Space Syntax Analysis).
+
+## Assignment
+Test the P3 prototype at http://localhost:5173 using Playwright tests and visual screenshot examination.
+Write results to /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P3.md
+
+## Prerequisites
+- Backend: http://localhost:8000 (verify with curl)
+- Dev server: http://localhost:5173 (already running)
+- Playwright installed at /c/Users/johnc/collage-prototypes/
+
+## Step 1: Run Playwright Tests
+
+```bash
+cd /c/Users/johnc/collage-prototypes
+npx playwright test --project=p3-network
+```
+
+Tests trigger extraction of Barcelona Eixample. Space syntax computation can take 30-60s.
+
+## Step 2: Examine Screenshots
+
+Read each PNG in /c/Users/johnc/collage-prototypes/test-results/screenshots/p3/.
+
+Expected visuals:
+- 01-map-loaded.png: Barcelona at zoom 14, flat (no pitch), sidebar on left
+- 02-network-loaded.png: Colored street lines overlaid on map (viridis gradient)
+- 03-metric-values.png: Network with centrality coloring, major streets warmer colors
+- 04-network-stats.png: Sidebar showing topology stats (meshedness, dead-end ratio)
+
+## Step 3: Check Key Values
+
+From [P3-TEST] console output:
+- Street count: >50 (expecting 200-2000)
+- Centrality nodes: >0
+- NAIN/NACH values: between 0 and 2.0
+- Meshedness: 0.1-0.5 for Barcelona grid
+- Dead-end ratio: 0.02-0.15
+
+## Step 4: Write Results
+
+Write /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P3.md:
+
+```markdown
+# P3 — Network Analysis Test Results
+Date: YYYY-MM-DD
+
+## Summary
+| Test | Status | Notes |
+|------|--------|-------|
+| Map loads flat | PASS/FAIL | ... |
+| Network extraction | PASS/FAIL | Streets: N, nodes: N |
+| NAIN/NACH values valid | PASS/FAIL | Range: [min, max], mean: N |
+| Network stats populated | PASS/FAIL | Meshedness: N |
+
+## Network Metrics
+| Metric | Value | Expected Range |
+|--------|-------|----------------|
+| Street count | N | 50-2000 |
+| NAIN_800 mean | N | 0.5-0.9 |
+| Meshedness | N | 0.1-0.5 |
+| Dead-end ratio | N | 0.02-0.15 |
+
+## Visual Assessment
+(Describe each screenshot — especially street coloring patterns)
+
+## Issues Found
+## Recommendations
+```
+
+## Important Notes
+- P3 uses flat (pitch=0) view — no 3D buildings, just colored street lines
+- cityseer space syntax computation is CPU-intensive, may take a while
+- Barcelona Eixample has a very regular grid, so NAIN values should be high
+- neatnet street simplification should reduce edges by 58-95%

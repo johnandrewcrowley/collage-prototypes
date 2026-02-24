@@ -72,7 +72,7 @@ export function MapShell({
       zoom,
       pitch,
       bearing: 0,
-      canvasContextAttributes: { antialias: true },
+      canvasContextAttributes: { antialias: true, preserveDrawingBuffer: true },
     });
 
     mapRef.current = map;
@@ -121,6 +121,10 @@ export function MapShell({
               : null,
             mapZoom: mapRef.current?.getZoom() ?? null,
           };
+        },
+        triggerExtraction: async (bbox: BBox, backendUrlOverride?: string) => {
+          const url = backendUrlOverride ?? backendUrl;
+          await useMapStore.getState().extract(bbox, url);
         },
       };
     });

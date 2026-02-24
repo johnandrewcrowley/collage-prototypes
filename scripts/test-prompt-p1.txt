@@ -1,0 +1,75 @@
+You are running automated visual tests for Prototype P1 (Sustainability Scanner).
+
+## Assignment
+Test the P1 prototype at http://localhost:5171 using Playwright tests and visual screenshot examination.
+Write results to /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P1.md
+
+## Prerequisites
+- Backend: http://localhost:8000 (verify with curl)
+- Dev server: http://localhost:5171 (already running)
+- Playwright installed at /c/Users/johnc/collage-prototypes/
+
+## Step 1: Run Playwright Tests
+
+```bash
+cd /c/Users/johnc/collage-prototypes
+npx playwright test --project=p1-sustainability
+```
+
+Record the output. Tests trigger extraction of Barcelona Eixample.
+
+## Step 2: Examine Screenshots
+
+Read each PNG in /c/Users/johnc/collage-prototypes/test-results/screenshots/p1/.
+
+Expected visuals:
+- 01-map-loaded.png: Barcelona on light basemap, solar controls panel at bottom
+- 02-buildings-with-shadows.png: 3D buildings with visible shadows on ground plane
+- 03-metrics-computed.png: Buildings potentially colored by sustainability metric
+- 04-environment-tab.png: Environment metric tab active, buildings colored
+- 05-climate-risk-tab.png: Climate risk tab active
+- 06-bvh-status.png: Status after BVH raycasting attempt
+
+## Step 3: Check Key Values
+
+From [P1-TEST] console output:
+- Building count: >50
+- Shadow enabled: should be true
+- Shadow coverage: number between 0 and 1
+- Metrics computed: should be true
+- BVH ready: may be false in SwiftShader (expected limitation)
+
+## Step 4: Write Results
+
+Write /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P1.md:
+
+```markdown
+# P1 — Sustainability Scanner Test Results
+Date: YYYY-MM-DD
+
+## Summary
+| Test | Status | Notes |
+|------|--------|-------|
+| Map loads with shadow system | PASS/FAIL | ... |
+| Extraction loads buildings | PASS/FAIL | Count: N |
+| Sustainability metrics computed | PASS/FAIL | ... |
+| Shadow coverage valid | PASS/FAIL | Coverage: N |
+| Tab switching | PASS/FAIL | ... |
+| BVH metrics status | PASS/FAIL | BVH ready: Y/N |
+
+## Visual Assessment
+(Describe each screenshot — especially shadow quality)
+
+## Known Limitations
+- BVH raycasting (SVF, VSC, sun hours) may not complete in SwiftShader
+- Shadow rendering quality may differ from hardware GPU
+
+## Issues Found
+## Recommendations
+```
+
+## Important Notes
+- P1 has the most complex rendering: shadows, BVH raycasting, heatmaps
+- SwiftShader (software WebGL) may struggle with the BVH computations
+- Shadow coverage depends on time of day and sun position
+- If BVH metrics don't complete, that's expected in headless — note it clearly

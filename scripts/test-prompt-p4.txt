@@ -1,0 +1,79 @@
+You are running automated visual tests for Prototype P4 (Fragment Workflow).
+
+## Assignment
+Test the P4 prototype at http://localhost:5174 using Playwright tests and visual screenshot examination.
+Write results to /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P4.md
+
+## Prerequisites
+- Backend: http://localhost:8000 (verify with curl)
+- Dev server: http://localhost:5174 (already running)
+- Playwright installed at /c/Users/johnc/collage-prototypes/
+
+## Step 1: Run Playwright Tests
+
+```bash
+cd /c/Users/johnc/collage-prototypes
+npx playwright test --project=p4-fragment
+```
+
+Tests trigger extraction of Barcelona Eixample and test the fragment workflow.
+
+## Step 2: Examine Screenshots
+
+Read each PNG in /c/Users/johnc/collage-prototypes/test-results/screenshots/p4/.
+
+Expected visuals:
+- 01-idle.png: Barcelona on map, dark sidebar on left, "Backend connected" indicator
+- 02-extracted.png: 3D buildings visible after extraction, metric summary bar at bottom
+- 03-metrics.png: Fragment metrics displayed (GSI, FSI, height)
+- 04-library-saved.png: Fragment saved to library sidebar (if save was successful)
+
+## Step 3: Check Key Values
+
+From [P4-TEST] console output:
+- Phase transitions: idle → extracting → extracted
+- Building count: >20
+- GSI: ~0.37 (±15%)
+- FSI: ~1.89 (±15%)
+- Library count after save: should be >0
+
+## Step 4: Write Results
+
+Write /c/Users/johnc/collage-prototypes/test-results/TEST_RESULTS_P4.md:
+
+```markdown
+# P4 — Fragment Workflow Test Results
+Date: YYYY-MM-DD
+
+## Summary
+| Test | Status | Notes |
+|------|--------|-------|
+| Map loads idle | PASS/FAIL | Phase: idle, library: empty |
+| Extraction creates fragment | PASS/FAIL | Buildings: N, streets: N |
+| Fragment metrics match | PASS/FAIL | GSI: N, FSI: N |
+| Library save | PASS/FAIL | Count: N |
+| Library API accessible | PASS/FAIL | ... |
+
+## Benchmark Validation
+| Metric | Expected | Actual | Tolerance | Status |
+|--------|----------|--------|-----------|--------|
+| GSI | 0.37 | N | ±15% | PASS/FAIL |
+| FSI | 1.89 | N | ±15% | PASS/FAIL |
+
+## Visual Assessment
+(Describe each screenshot)
+
+## Known Limitations
+- Fragment placement (Stage 4) requires mouse interaction — not tested
+- Network merge (Stage 5) requires placed fragment — not tested
+- Only extraction + save workflow is tested programmatically
+
+## Issues Found
+## Recommendations
+```
+
+## Important Notes
+- P4 has the most complex workflow (5 stages) but only stages 1-2 are testable
+- Fragment placement requires clicking on the map at a destination city
+- The radar chart comparison requires a placed fragment vs context
+- Focus on extraction quality and metric accuracy

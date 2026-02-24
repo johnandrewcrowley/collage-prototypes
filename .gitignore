@@ -36,6 +36,11 @@ Thumbs.db
 .env
 .env.local
 
+# Test results (screenshots, logs, artifacts)
+test-results/
+!test-results/screenshots/
+!test-results/screenshots/**/.gitkeep
+
 # Turbo
 .turbo/
 
